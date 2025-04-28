@@ -8,7 +8,15 @@
     ],
     "routes": [
       {
-        "src": "/(.*)",
+        "src": "/certificate",
+        "dest": "app/main.py"
+      },
+      {
+        "src": "/health",
+        "dest": "app/main.py"
+      },
+      {
+        "src": "/assets/(.*)",
         "dest": "app/main.py"
       }
     ]

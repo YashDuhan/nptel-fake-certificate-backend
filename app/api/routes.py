@@ -2,15 +2,15 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 import os
 from pathlib import Path
-import logging
 
 router = APIRouter()
 
-# Get the base directory
+# Get the base directory - handle both local and Vercel environments
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-logger.debug(f"Base directory: {BASE_DIR}")
+if "VERCEL" in os.environ:
+    # In Vercel, we need to use the absolute path
+    BASE_DIR = Path("/var/task")
 
-# Health check endpoint
 @router.get("/health")
 async def health_check():
     return {"status": "ok"}
@@ -32,14 +32,19 @@ async def get_certificate(cert_id: str):
     if not cert_id:
         raise HTTPException(status_code=400, detail="No certificate ID provided")
     
-    # Construct the full path to the PDF file
-    pdf_path = BASE_DIR / 'assets' / f'{cert_id}.pdf'
-    logger.debug(f"Looking for PDF at: {pdf_path}")
-    logger.debug(f"Directory contents: {os.listdir(BASE_DIR / 'assets')}")
-    
-    if not pdf_path.exists():
-        logger.error(f"File not found at: {pdf_path}")
-        raise HTTPException(status_code=404, detail="Certificate not found")
-    
-    return FileResponse(pdf_path, filename=f"{cert_id}.pdf", media_type='application/pdf')
+    try:
+        # Construct the full path to the PDF file
+        pdf_path = BASE_DIR / 'assets' / f'{cert_id}.pdf'
+        
+        if not pdf_path.exists():
+            raise HTTPException(status_code=404, detail="Certificate not found")
+        
+        return FileResponse(
+            pdf_path,
+            filename=f"{cert_id}.pdf",
+            media_type='application/pdf',
+            headers={"Content-Disposition": f"attachment; filename={cert_id}.pdf"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
 
