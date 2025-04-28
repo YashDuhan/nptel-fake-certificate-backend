@@ -21,7 +21,7 @@ async def get_certificate(cert_id: str):
     if not cert_id:
         raise HTTPException(status_code=400, detail="No certificate ID provided")
     
-    github_url = f"https://raw.githubusercontent.com/YashDuhan/nptel-fake-certificate-assets-dir/49ed488a84054a1f411593a3a82d9041140d5e92/assets/{cert_id}.pdf"
+    github_url = f"https://raw.githubusercontent.com/YashDuhan/nptel-fake-certificate-assets-dir/99fe1b1c77eac01f8ef4223b09703e360d0353a1/assets/{cert_id}.pdf"
     async with httpx.AsyncClient() as client:
         r = await client.get(github_url)
         if r.status_code != 200:
