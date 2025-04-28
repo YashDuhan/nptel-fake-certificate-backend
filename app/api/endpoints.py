@@ -24,5 +24,7 @@ async def get_certificate(cert_id: str):
     github_url = f"https://raw.githubusercontent.com/YashDuhan/nptel-fake-certificate-assets-dir/5889b86a2ef6ed87bf96e8796cbfc87129165f8a/assets/{cert_id}.pdf"
     
     # Redirect to the GitHub raw URL
-    return RedirectResponse(url=github_url)
+    response = RedirectResponse(url=github_url)
+    response.headers["Content-Disposition"] = f"attachment; filename={cert_id}.pdf"
+    return response
     
