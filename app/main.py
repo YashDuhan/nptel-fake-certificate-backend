@@ -16,8 +16,8 @@ app.add_middleware(
 # Include the router
 app.include_router(app_router)
 
-# For Vercel deployment
-app = app
+# For Vercel
+handler = app
 
 if __name__ == "__main__":
     import uvicorn
