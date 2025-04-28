@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import StreamingResponse
+import httpx
 
 app = FastAPI()
 
@@ -12,19 +13,23 @@ async def get_certificate(cert_id: str):
         cert_id (str): The certificate ID to retrieve
         
     Returns:
-        RedirectResponse: Redirects to the GitHub raw PDF URL
+        StreamingResponse: Streams the PDF file with the correct filename
         
     Raises:
-        HTTPException: If certificate ID not provided
+        HTTPException: If certificate ID not provided or file not found
     """
     if not cert_id:
         raise HTTPException(status_code=400, detail="No certificate ID provided")
     
-    # Construct the GitHub raw URL
     github_url = f"https://raw.githubusercontent.com/YashDuhan/nptel-fake-certificate-assets-dir/5889b86a2ef6ed87bf96e8796cbfc87129165f8a/assets/{cert_id}.pdf"
-    
-    # Redirect to the GitHub raw URL
-    response = RedirectResponse(url=github_url)
-    response.headers["Content-Disposition"] = f"attachment; filename={cert_id}.pdf"
-    return response
-    
+    async with httpx.AsyncClient() as client:
+        r = await client.get(github_url)
+        if r.status_code != 200:
+            raise HTTPException(status_code=404, detail="Certificate not found on GitHub")
+        return StreamingResponse(
+            iter([r.content]),
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f"attachment; filename={cert_id}.pdf"
+            }
+        )
