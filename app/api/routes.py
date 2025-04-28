@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 import os
 from pathlib import Path
 
@@ -10,6 +10,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 if "VERCEL" in os.environ:
     # In Vercel, we need to use the absolute path
     BASE_DIR = Path("/var/task")
+
+@router.get("/")
+async def root():
+    """
+    Default route that returns basic API information
+    """
+    return {
+        "name": "NPTEL Certificate API",
+        "version": "1.0.0",
+        "endpoints": ["/", "/health", "/certificate"]
+    }
 
 @router.get("/health")
 async def health_check():
